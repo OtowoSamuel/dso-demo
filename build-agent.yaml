@@ -19,8 +19,6 @@ spec:
         - cat
       tty: true
       volumeMounts:
-        - mountPath: /var/run
-          name: docker-sock
         - mountPath: /tmp/trivycache/
           name: trivycache
     - name: kaniko
@@ -30,6 +28,10 @@ spec:
         - sleep
       args:
         - 99d
+      # 1. Added environment variable so Kaniko looks for your credentials in the correct folder
+      env:
+        - name: DOCKER_CONFIG
+          value: /kaniko/.docker
       volumeMounts:
         - name: jenkins-docker-cfg
           mountPath: /kaniko/.docker
@@ -44,15 +46,11 @@ spec:
         - cat
       tty: true
   volumes:
+    # 2. Changed hostPath to emptyDir because EKS blocks hostPath for security reasons
     - name: m2
-      hostPath:
-        path: /tmp/.m2/
-    - name: docker-sock
-      hostPath:
-        path: /var/run
+      emptyDir: {}
     - name: trivycache
-      hostPath:
-        path: /tmp/trivycache/
+      emptyDir: {}
     - name: jenkins-docker-cfg
       projected:
         sources:
