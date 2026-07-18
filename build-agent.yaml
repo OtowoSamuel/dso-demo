@@ -19,8 +19,6 @@ spec:
         - cat
       tty: true
       volumeMounts:
-        - mountPath: /var/run
-          name: docker-sock
         - mountPath: /tmp/trivycache/
           name: trivycache
     - name: kaniko
@@ -32,7 +30,7 @@ spec:
         - 99d
       volumeMounts:
         - name: jenkins-docker-cfg
-          mountPath: /kaniko/.docker
+          mountPath: /kaniko/.docker/
     - name: trufflehog
       image: rmkanda/trufflehog
       command:
@@ -44,20 +42,14 @@ spec:
         - cat
       tty: true
   volumes:
+    # Changed hostPath to emptyDir so it runs securely inside EKS
     - name: m2
-      hostPath:
-        path: /tmp/.m2/
-    - name: docker-sock
-      hostPath:
-        path: /var/run
+      emptyDir: {}
     - name: trivycache
-      hostPath:
-        path: /tmp/trivycache/
+      emptyDir: {}
     - name: jenkins-docker-cfg
-      projected:
-        sources:
-          - secret:
-              name: regcred
-              items:
-                - key: .dockerconfigjson
-                  path: config.json
+      secret:
+        secretName: regcred
+        items:
+          - key: .dockerconfigjson
+            path: config.json

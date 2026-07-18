@@ -5,8 +5,8 @@ pipeline {
       defaultContainer 'maven'
       idleMinutes 1
     }
-
   }
+  
   stages {
     stage('Build') {
       parallel {
@@ -15,10 +15,8 @@ pipeline {
             container(name: 'maven') {
               sh 'mvn compile'
             }
-
           }
         }
-
       }
     }
 
@@ -29,10 +27,8 @@ pipeline {
             container(name: 'maven') {
               sh 'mvn test'
             }
-
           }
         }
-
       }
     }
 
@@ -43,18 +39,17 @@ pipeline {
             container(name: 'maven') {
               sh 'mvn package -DskipTests'
             }
-
           }
         }
 
         stage('Docker BnP') {
           steps {
             container(name: 'kaniko') {
-              sh '/kaniko/executor -f `pwd`/Dockerfile -c `pwd` --insecure --skip-tls-verify --cache=true --destination=docker.io/otowosamuel/dso-demo'
+              // Added --force flag and explicit :latest tag to destination
+              sh '/kaniko/executor -f `pwd`/Dockerfile -c `pwd` --insecure --skip-tls-verify --cache=true --destination=docker.io/otowosamuel/dso-demo:latest --force'
             }
           }
         }
-
       }
     }
 
@@ -63,6 +58,5 @@ pipeline {
         sh 'echo done'
       }
     }
-
   }
 }
