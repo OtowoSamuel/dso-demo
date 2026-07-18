@@ -6,7 +6,6 @@ pipeline {
       idleMinutes 1
     }
   }
-  
   stages {
     stage('Build') {
       parallel {
@@ -45,8 +44,8 @@ pipeline {
         stage('Docker BnP') {
           steps {
             container(name: 'kaniko') {
-              // Added --force flag and explicit :latest tag to destination
-              sh '/kaniko/executor -f `pwd`/Dockerfile -c `pwd` --insecure --skip-tls-verify --cache=true --destination=docker.io/otowosamuel/dso-demo:latest --force'
+              // Added --force to bypass the container safety check, and :latest tag
+              sh '/kaniko/executor -f `pwd`/Dockerfile -c `pwd` --insecure --skip-tls-verify --cache=true --destination=docker.io/otowosamuel/dso-demo --force'
             }
           }
         }
